@@ -74,7 +74,7 @@ def Convertir():
         print(str(hauteur) + 'x' + str(largeur) + ' -- ' + str(ratio))
 
         out = im.resize((hauteur,largeur))
-        output_file = filename +'_resized.'+format_output
+        output_file = os.path.splitext(filename)[0] + '_resized.'+format_output
 ##optimize=True, progressive=True
         out.save(output_file, format_output, quality = qualityValue )
 
