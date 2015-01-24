@@ -79,25 +79,54 @@ def Convertir():
         out.save(output_file, format_output, quality = qualityValue )
 
 def maj_hauteur(a,b,c):
-    global ratio, ValeurRatio_b
-    try:
-        if ValeurRatio_b.get() == 1 and ValeurHauteur.get() != 0:
-            ValeurLargeur.set(int(ValeurHauteur.get() * ratio))
-    except ValueError:
-        pass
+    global ratio, ValeurRatio_b, m_hauteur, m_largeur, ValeurHauteur, ValeurLargeur
+    print('maj H' +str(m_largeur) + ' m ' +str(m_hauteur))
+
+    if ValeurRatio_b.get() == 1 and m_largeur == False:
+        m_hauteur = True
+        try:
+            if ValeurHauteur.get() != 0:
+                ValeurLargeur.set(int(ValeurHauteur.get() * ratio))
+                check_size()
+            
+            m_hauteur = False
+        except ValueError:
+            m_hauteur = False
+            pass
 
 def maj_largeur(a,b,c):
-    global ratio, ValeurRatio_b
-    try:
-        if ValeurRatio_b.get() == 1:
-            ValeurHauteur.set(int(ValeurLargeur.get() / ratio))
-    except ValueError:
-        pass
+    global ratio, ValeurRatio_b, m_hauteur, m_largeur, ValeurHauteur, ValeurLargeur
+    print('maj L' + str(m_largeur) + ' m ' +str(m_hauteur))
+    if ValeurRatio_b.get() == 1 and m_hauteur == False :
+        m_largeur = True
+        try:
+            if ValeurLargeur.get() != 0:
+                ValeurHauteur.set(int(ValeurLargeur.get() / ratio))
+                check_size()
 
+            m_largeur = False
+        except ValueError:
+            m_largeur = False
+            pass
+
+def check_size():
+    global ValeurLargeur, ValeurHauteur
+    print("Check size")
+    if ValeurLargeur.get() >= 10000 :
+        print("Largeur trop grande")
+        ValeurLargeur.set(10000)
+        ValeurHauteur.set(int(ValeurLargeur.get() / ratio))
+
+    if ValeurHauteur.get() > 10000 :
+        print("Hauteur trop grande")
+        ValeurHauteur.set(10000)
+        ValeurLargeur.set(int(ValeurHauteur.get() / ratio))
 
 global Canevas
 largeur = 0
 hauteur = 0
+m_largeur = False 
+m_hauteur = False
 ratio = 0
 inputfile = ''
 output_file = 'resize'
