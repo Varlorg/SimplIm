@@ -12,7 +12,7 @@ import tkinter.filedialog
 
 
 def Ouvrir():
-    global photo, ratio, im, filename
+    global photo, ratio, im, filename, photo_GS
     size_thumbnail = 256, 256
     Canevas.delete(ALL) # on efface la zone graphique
     
@@ -25,18 +25,27 @@ def Ouvrir():
     filename = tkinter.filedialog.askopenfilename(title="Ouvrir une image",filetypes=filetypes_image)
     print(filename)
     
-    im = PIL.Image.open(filename)
-    im_thumb =  im.copy()
-    im_thumb.thumbnail(size_thumbnail, PIL.Image.ANTIALIAS)
-    photo = ImageTk.PhotoImage(im_thumb)
-    Canevas.create_image(0,0,anchor=NW,image=photo)
-    Canevas.config(height=photo.height(),width=photo.width())
+    if filename != None:
+        im = PIL.Image.open(filename)
+        im_thumb =  im.copy()
+        im_thumb.thumbnail(size_thumbnail, PIL.Image.ANTIALIAS)
+        im_thumb_GS = im_thumb.copy().convert('L')
+        photo = ImageTk.PhotoImage(im_thumb)
+        photo_GS = ImageTk.PhotoImage(im_thumb_GS)
+        Canevas.create_image(0,0,anchor=NW,image=photo)
+        Canevas.config(height=photo.height(),width=photo.width())
 
-    ValeurLargeur.set(im.size[0])
-    ValeurHauteur.set(im.size[1])
-    ratio = float(im.size[0]) / im.size[1]
+        ValeurLargeur.set(im.size[0])
+        ValeurHauteur.set(im.size[1])
+        ratio = float(im.size[0]) / im.size[1]
 
-    #Mafenetre.title("Image "+str(photo.width())+" x "+str(photo.height()))
+def grayscale(a,b,c):
+    global photo, photo_GS
+    if ValeurGS.get() == 1:
+        Canevas.create_image(0,0,anchor=NW,image=photo_GS)
+    else:
+        Canevas.create_image(0,0,anchor=NW,image=photo)
+#Mafenetre.title("Image "+str(photo.width())+" x "+str(photo.height()))
 
 def Fermer():
     Canevas.delete(ALL)
@@ -73,7 +82,8 @@ def Convertir():
 
         print(str(hauteur) + 'x' + str(largeur) + ' -- ' + str(ratio))
 
-        out = im.resize((hauteur,largeur))
+        out = im.resize((largeur,hauteur))
+        out = out.convert('L')
         output_file = os.path.splitext(filename)[0] + '_resized.'+format_output
 ##optimize=True, progressive=True
         out.save(output_file, format_output, quality = qualityValue )
@@ -141,9 +151,10 @@ Mafenetre.title("SimplIm")
 menubar = Menu(Mafenetre)
 
 menufichier = Menu(menubar,tearoff=0)
-menufichier.add_command(label="Ouvrir une image",command=Ouvrir)
-menufichier.add_command(label="Fermer l'image",command=Fermer)
-menufichier.add_command(label="Quitter",command=Mafenetre.destroy)
+menufichier.add_command(label="Ouvrir une image",command=Ouvrir, accelerator="Ctrl+O")
+menufichier.add_command(label="Convertir",command=Convertir, accelerator="Ctrl+C")
+menufichier.add_command(label="Fermer l'image",command=Fermer, accelerator="Ctrl+F")
+menufichier.add_command(label="Quitter",command=Mafenetre.destroy, accelerator="Ctrl+Q")
 menubar.add_cascade(label="Fichier", menu=menufichier)
 
 menuaide = Menu(menubar,tearoff=0)
@@ -181,6 +192,10 @@ ValeurRatio_b = IntVar()
 ValeurRatio_b.set(0) 
 ValeurRatio_b.trace('w',maj_largeur)
 
+ValeurGS = IntVar()
+ValeurGS.set(0)
+ValeurGS.trace('w',grayscale)
+
 # Affichage du menu
 Mafenetre.config(menu=menubar)
 
@@ -203,6 +218,10 @@ boite.grid(row=2,column=1)
 Label(FrameParameter,text="Conserver le ratio").grid(row=3, column=0, padx=10, pady=5)
 c = Checkbutton(FrameParameter, text="", variable=ValeurRatio_b)
 c.grid(row=3,column=1)
+
+Label(FrameParameter,text="Noir et Blanc").grid(row=4, column=0, padx=10, pady=5)
+c_grayscale = Checkbutton(FrameParameter, text="", variable=ValeurGS)
+c_grayscale.grid(row=4,column=1)
 
 
 #Bouton Convertir

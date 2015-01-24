@@ -53,7 +53,7 @@ def main(argv):
                 hauteur = im.size[1]
                 largeur = im.size[0]
 
-       out = im.resize((hauteur,largeur))
+       out = im.resize((largeur,hauteur))
        output_file = output_file+'.'+format_output
        print(inputfile + ' ' + str(im.size[1]) + 'x' + str(im.size[1]) + ' to ' + str(largeur) + 'x' + str(largeur) + ' saved in '+ output_file)
 #optimize=True, progressive=True
