@@ -11,16 +11,17 @@ def main(argv):
     ratio_b  = False 
     qualityValue = 85
     format_output  = 'jpeg'
-    howto = 'test.py -i photo -l <largeur> -h <hauteur> -q qualité -r -f format -o nom_de_sortie'
+    howto = '''-i photo -l <largeur> -h <hauteur> [-q qualité] [-r] [-f format] [-o nom_de_sortie]\n
+    if option -r, only one size (height or width) car be precised '''
 
     try:
         opts, args = getopt.getopt(argv,"i:l:h:rq:o:f:",["ifile=","ofile="])
     except getopt.GetoptError:
-       print  howto
+       print os.path.basename(__file__), howto
        sys.exit(2)
 
     if len(opts) < 2:
-        print howto
+        print os.path.basename(__file__), howto
         sys.exit(1)
 
     for opt, arg in opts:
