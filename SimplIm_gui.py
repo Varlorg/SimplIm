@@ -196,17 +196,31 @@ class SimplIm(tkinter.Tk):
     def Convertir(self, *args):
         # global ratio, im, filename
         global im, filename
+        erreur = False
+
         try:
             self.photo
         except NameError:
             self.photo = None
+            erreur = True
+            tkinter.messagebox.showerror("Erreur fichier", "Largeur n'est pas valide")
 
         if self.photo is None:
             tkinter.messagebox.showerror("Erreur", "Pas de photo ouverte")
         else:
             print("Conversion")
-            self.largeur = self.ValeurLargeur.get()
-            self.hauteur = self.ValeurHauteur.get()
+            try:
+                self.largeur = self.ValeurLargeur.get()
+            except ValueError:
+                erreur = True
+                tkinter.messagebox.showerror("Erreur Dimension", "Largeur n'est pas valide")
+
+            try:
+                self.hauteur = self.ValeurHauteur.get()
+            except ValueError:
+                erreur = True
+                tkinter.messagebox.showerror("Erreur Dimension", "Hauteur n'est pas valide")
+
             self.ratio_b = self.ValeurRatio_b.get()
             self.qualityValue = self.ValeurQuality.get()
             print(self.ratio_b)
@@ -222,12 +236,14 @@ class SimplIm(tkinter.Tk):
 
             print(str(self.hauteur) + 'x' + str(self.largeur) + ' -- ' + str(self.ratio))
 
-            out = im.resize((self.largeur, self.hauteur))
-            out = out.convert('L')
-            print(self.format_output)
-            self.output_file = os.path.splitext(filename)[0] + '_resized.' + str(self.format_output.get())
+            if erreur is False: 
+                out = im.resize((self.largeur, self.hauteur))
+                out = out.convert('L')
+                print(self.format_output)
+                self.output_file = os.path.splitext(filename)[0] + '_resized.' + str(self.format_output.get())
 # optimize=True, progressive=True
-            out.save(self.output_file, self.format_output.get(), quality=self.qualityValue)
+                out.save(self.output_file, self.format_output.get(), quality=self.qualityValue)
+
 
     def check_size(self, *args):
 
@@ -246,34 +262,40 @@ class SimplIm(tkinter.Tk):
 
     def maj_hauteur(self, *args):
         print('maj H' + str(self.m_largeur) + ' m ' + str(self.m_hauteur))
-        print(str(self.ValeurLargeur.get()) + "---" + str(self.ValeurHauteur.get()))
-        if self.ValeurRatio_b.get() == 1 and self.m_largeur is False:
-            self.m_hauteur = True
-            try:
-                if self.ValeurHauteur.get() != 0:
-                    self.ValeurLargeur.set(int(self.ValeurHauteur.get() * self.ratio))
-                    self.check_size(self, *args)
+        try:
+            print(str(self.ValeurLargeur.get()) + "---" + str(self.ValeurHauteur.get()))
+            if self.ValeurRatio_b.get() == 1 and self.m_largeur is False:
+                self.m_hauteur = True
+                try:
+                    if self.ValeurHauteur.get() != 0:
+                        self.ValeurLargeur.set(int(self.ValeurHauteur.get() * self.ratio))
+                        self.check_size(self, *args)
 
-                self.m_hauteur = False
-            except ValueError:
-                self.m_hauteur = False
-                pass
-
+                    self.m_hauteur = False
+                except ValueError:
+                    self.m_hauteur = False
+                    pass
+        except ValueError:
+            pass
+        
     def maj_largeur(self, *args):
         print('maj L' + str(self.m_largeur) + ' m ' + str(self.m_hauteur))
-        print(str(self.ValeurLargeur.get()) + "---" + str(self.ValeurHauteur.get()))
-        if self.ValeurRatio_b.get() == 1 and self.m_hauteur is False:
-            self.m_largeur = True
-            try:
-                if self.ValeurLargeur.get() != 0:
-                    self.ValeurHauteur.set(int(self.ValeurLargeur.get() / self.ratio))
-                    print(str(self.ValeurLargeur.get()) + "--" + str(self.ratio))
-                    self.check_size(self, *args)
+        try:
+            print(str(self.ValeurLargeur.get()) + "---" + str(self.ValeurHauteur.get()))
+            if self.ValeurRatio_b.get() == 1 and self.m_hauteur is False:
+                self.m_largeur = True
+                try:
+                    if self.ValeurLargeur.get() != 0:
+                        self.ValeurHauteur.set(int(self.ValeurLargeur.get() / self.ratio))
+                        print(str(self.ValeurLargeur.get()) + "--" + str(self.ratio))
+                        self.check_size(self, *args)
 
-                self.m_largeur = False
-            except ValueError:
-                self.m_largeur = False
-                pass
+                    self.m_largeur = False
+                except ValueError:
+                    self.m_largeur = False
+                    pass
+        except ValueError:
+            pass
 
 
 if __name__ == "__main__":
