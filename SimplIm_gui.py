@@ -10,6 +10,7 @@ import os, sys, getopt
 from tkinter import *
 # import tkinter
 import tkinter.messagebox
+import tkinter.scrolledtext
 import tkinter.filedialog
 
 
@@ -98,50 +99,70 @@ class SimplIm(tkinter.Tk):
         self.Canevas.pack(padx=5, pady=5)
 
 # Ajout des paramètres modifiables par l'utilisateur
-        Label(FrameParameter, text="Largeur").grid(row=0, column=0,
-                                                   padx=10, pady=5)
+        Label(FrameParameter, text="Largeur").grid(row=0, column=0, sticky=W)
         # pack(padx=10,pady=10,fill=X)
         boite = tkinter.Spinbox(FrameParameter, from_=0, to=10000, increment=1,
                                 textvariable=self.ValeurLargeur, width=5)
-        boite.grid(row=0, column=1)
+        boite.grid(row=0, column=1, sticky=W)
         # pack(side = BOTTOM,padx=30,pady=10, fill=X)
 
-        Label(FrameParameter, text="Hauteur").grid(row=1, column=0,
-                                                   padx=10, pady=5)
+        Label(FrameParameter, text="Hauteur").grid(row=1, column=0, sticky=W)
         boite = tkinter.Spinbox(FrameParameter, from_=0, to=10000, increment=1,
                                 textvariable=self.ValeurHauteur, width=5)
-        boite.grid(row=1, column=1)
+        boite.grid(row=1, column=1, sticky=W)
 
-        Label(FrameParameter, text="Qualité").grid(row=2, column=0, padx=10, pady=5)
+        Label(FrameParameter, text="Qualité").grid(row=2, column=0, sticky=W)
         boite = tkinter.Spinbox(FrameParameter, from_=0, to=95, increment=1,
                                 textvariable=self.ValeurQuality, width=5)
-        boite.grid(row=2, column=1)
+        boite.grid(row=2, column=1, sticky=W)
 
         Label(FrameParameter, text="Conserver le ratio").grid(row=3, column=0,
-                                                              padx=10, pady=5)
+                                                              sticky=W)
         c = tkinter.Checkbutton(FrameParameter, text="", variable=self.ValeurRatio_b)
-        c.grid(row=3, column=1)
+        c.grid(row=3, column=1, sticky=W)
 
-        Label(FrameParameter, text="Noir et Blanc").grid(row=4, column=0, padx=10, pady=5)
+        Label(FrameParameter, text="Noir et Blanc").grid(row=4, column=0, sticky=W)
         c_grayscale = tkinter.Checkbutton(FrameParameter, text="", variable=self.ValeurGS)
-        c_grayscale.grid(row=4, column=1)
+        c_grayscale.grid(row=4, column=1, sticky=W)
 
 # Nom des formats de sortie et création de bouttons radio
         output_format_list =["jpeg", "png", "gif"]
         self.format_output = StringVar()
         self.format_output.set("jpeg")
 
-        Label(FrameParameter, text="Format de sortie :").grid(row=5, column=0, padx=10, pady=5)
+        Label(FrameParameter, text="Format de sortie :").grid(row=5, column=0, sticky=W)
         for n in range(3):
             bout = tkinter.Radiobutton(FrameParameter,
                             text = output_format_list[n],
                             variable = self.format_output,
                             value = output_format_list[n]) # ,
-            bout.grid(row=5, column=n+1,pady=0, padx=0)
+            bout.grid(row=5, column=n+1, sticky=W)
+
+        Label(FrameParameter, text="Nom de sortie :").grid(row=6, column=0, sticky=W)
+        self.output_filename = tkinter.Entry(FrameParameter, width=25)
+        self.output_filename.grid(row=6,column=1,columnspan=3, sticky=W)
+        self.output_filename.insert(END,'sss')
+
+        Label(FrameParameter, text="Chemin de sortie :").grid(row=7, column=0, sticky=W)
+        #self.output_folder = tkinter.Text(FrameParameter,height=1, width=25)
+        self.output_folder = tkinter.Entry(FrameParameter, width=25)
+        #self.output_folder = tkinter.scrolledtext.ScrolledText(FrameParameter,height=1, width=30)
+        self.output_folder.grid(row=7,column=1, columnspan=2, sticky=W)
+        self.output_folder.insert(END,'oooo')
+        self.output_folder.config(state=DISABLED)
+        BoutonOutput = Button(FrameParameter, text='...',command=self.ChangerDossier)
+        BoutonOutput.grid(row=7,column=3)
 
 # Bouton Convertir
         BoutonConvert = Button(self, text='Convertir Image', command=self.Convertir)
         BoutonConvert.pack(side=BOTTOM, padx=5, pady=5, fill=X)
+
+    def ChangerDossier(self,event=None):
+        self.output_folder.config(state=NORMAL)
+        self.output_folder.delete(0, END)
+        self.output_folder.insert(END, tkinter.filedialog.askdirectory(title="Changer le dossier de destination"))
+        self.output_folder.config(state=DISABLED)
+
 
     def Ouvrir(self, event=None):
         # global photo, photoGS
@@ -164,6 +185,12 @@ class SimplIm(tkinter.Tk):
         if filename is not None:
             im = PIL.Image.open(filename)
             im_thumb = im.copy()
+            self.output_filename.delete(0,END)
+            self.output_filename.insert(END, os.path.splitext(os.path.basename(filename))[0] + '_resized' )
+            self.output_folder.config(state=NORMAL)
+            self.output_folder.delete(0, END)
+            self.output_folder.insert(END, os.path.dirname(filename))
+            self.output_folder.config(state=DISABLED)
             im_thumb.thumbnail(size_thumbnail, PIL.Image.ANTIALIAS)
             im_thumb_GS = im_thumb.copy().convert('L')
             self.photo = ImageTk.PhotoImage(im_thumb)
@@ -236,11 +263,12 @@ class SimplIm(tkinter.Tk):
 
             print(str(self.hauteur) + 'x' + str(self.largeur) + ' -- ' + str(self.ratio))
 
-            if erreur is False: 
+            if erreur is False:
                 out = im.resize((self.largeur, self.hauteur))
                 out = out.convert('L')
                 print(self.format_output)
-                self.output_file = os.path.splitext(filename)[0] + '_resized.' + str(self.format_output.get())
+                # self.output_file = os.path.splitext(filename)[0] + '_resized.' + str(self.format_output.get())
+                self.output_file = self.output_folder.get() + '/' + self.output_filename.get() + '.' + str(self.format_output.get())
 # optimize=True, progressive=True
                 out.save(self.output_file, self.format_output.get(), quality=self.qualityValue)
 
@@ -277,7 +305,7 @@ class SimplIm(tkinter.Tk):
                     pass
         except ValueError:
             pass
-        
+
     def maj_largeur(self, *args):
         print('maj L' + str(self.m_largeur) + ' m ' + str(self.m_hauteur))
         try:
